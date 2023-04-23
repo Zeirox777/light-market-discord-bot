@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Article 1",
+    "category": "Catégorie 1",
+    "price": "10"
+  },
+  {
+    "name": "Article 2",
+    "category": "Catégorie 2",
+    "price": "20"
+  },
+  {
+    "name": "Article 3",
+    "category": "Catégorie 1",
+    "price": "15"
+  }
+]
