@@ -15,6 +15,7 @@ const {
 } = require('discord.js');
 const { token } = require('./config.json');
 const { openedCategory } = require('./commands/tickets/config-ticket.json');
+const { COLLECTION_FORMATS } = require('openai/dist/base');
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
@@ -61,7 +62,7 @@ module.exports.commande = async function commande(interaction, channelU) {
 
 	const collector = messageCategory.createMessageComponentCollector({
 		filter: (interaction) => interaction.user.id,
-		time: 60000
+		time: 120000
 	});
 
 	collector.on('collect', async (interactionMenu) => {
@@ -103,7 +104,7 @@ module.exports.commande = async function commande(interaction, channelU) {
 			});
 			const messageCollector = await channelU.createMessageCollector({
 				filter: (msg) => msg.author.id === interaction.user.id,
-				time: 60000,
+				time: 120000,
 				max: 1,
 			});
 			await new Promise((resolve) => {
@@ -114,6 +115,7 @@ module.exports.commande = async function commande(interaction, channelU) {
 					resolve();
 				});
 				messageCollector.on('end', collected => {
+					channelU.send("Cette commande a été fermé pour inactivité de la part du client ! Veuillez effecture la commande **/close** afin d'ouvrir une nouvelle commande par la suite !")
 					resolve();
 				});
 			});
@@ -141,7 +143,7 @@ module.exports.commande = async function commande(interaction, channelU) {
 
 			const collector = confirmMessage.createMessageComponentCollector({
 				filter: (interaction) => interaction.user.id,
-				time: 60000
+				time: 120000
 			});
 
 			collector.on('collect', async (interactionButton) => {
@@ -217,8 +219,14 @@ module.exports.commande = async function commande(interaction, channelU) {
                     })
                 }
 			});
+			collector.on('end', collected => {
+				channelU.send("Cette commande a été fermé pour inactivité de la part du client ! Veuillez effecture la commande **/close** afin d'ouvrir une nouvelle commande par la suite !")
+			});
 		}
 	})
+	collector.on('end', collected => {
+		channelU.send("Cette commande a été fermé pour inactivité de la part du client ! Veuillez effecture la commande **/close** afin d'ouvrir une nouvelle commande par la suite !")
+	});
 }
 
 async function commande(interaction, channelU) {
@@ -251,7 +259,7 @@ async function commande(interaction, channelU) {
 
 	const collector = messageCategory.createMessageComponentCollector({
 		filter: (interaction) => interaction.user.id,
-		time: 60000
+		time: 120000
 	});
 
 	collector.on('collect', async (interactionMenu) => {
@@ -293,7 +301,7 @@ async function commande(interaction, channelU) {
 			});
 			const messageCollector = await channelU.createMessageCollector({
 				filter: (msg) => msg.author.id === interaction.user.id,
-				time: 60000,
+				time: 120000,
 				max: 1,
 			});
 			await new Promise((resolve) => {
@@ -304,6 +312,7 @@ async function commande(interaction, channelU) {
 					resolve();
 				});
 				messageCollector.on('end', collected => {
+					channelU.send("Cette commande a été fermé pour inactivité de la part du client ! Veuillez effecture la commande **/close** afin d'ouvrir une nouvelle commande par la suite !")
 					resolve();
 				});
 			});
@@ -331,7 +340,7 @@ async function commande(interaction, channelU) {
 
 			const collector = confirmMessage.createMessageComponentCollector({
 				filter: (interaction) => interaction.user.id,
-				time: 60000
+				time: 120000
 			});
 
 			collector.on('collect', async (interactionButton) => {
@@ -407,8 +416,14 @@ async function commande(interaction, channelU) {
                     })
                 }
 			});
+			collector.on('end', collected => {
+				channelU.send("Cette commande a été fermé pour inactivité de la part du client ! Veuillez effecture la commande **/close** afin d'ouvrir une nouvelle commande par la suite !")
+			});
 		}
 	})
+	collector.on('end', collected => {
+		channelU.send("Cette commande a été fermé pour inactivité de la part du client ! Veuillez effecture la commande **/close** afin d'ouvrir une nouvelle commande par la suite !")
+	});
 }
 
 for (const folder of commandFolders) {
@@ -448,30 +463,38 @@ client.on('interactionCreate', async interaction => {
         let data = fs.readFileSync('commands/tickets/ticket-opened.json');
         let userIds = JSON.parse(data);
 		if (!userIds.includes(userId)) {
-		const channelCreated = await interaction.guild.channels.create({
-			name: "commande-" + interaction.user.username,
-			type: 0,
-			permissionOverwrites: [{
-				id: interaction.guild.id,
-				deny: [PermissionsBitField.Flags.ViewChannel],
-			},
-			{
-				id: interaction.user.id,
-				allow: [PermissionsBitField.Flags.ViewChannel],
-			}, ],
-            parent: openedCategory,
-		})
-		channelCreated.send(`${interaction.user}, Passez votre commande ici !`)
-        channelCreated.setTopic(interaction.user.id,)
-        if (!userIds.includes(userId)) {
-            userIds.push(userId);
-        }
-        fs.writeFileSync('commands/tickets/ticket-opened.json', JSON.stringify(userIds));
-		interaction.reply({
-			content: `Votre commande a été ouverte ! ${channelCreated}`,
-			ephemeral: true
-		});
-		commande(interaction, channelCreated)
+			try {
+				const channelCreated = await interaction.guild.channels.create({
+					name: "commande-" + interaction.user.username,
+					type: 0,
+					permissionOverwrites: [{
+					id: interaction.guild.id,
+					deny: [PermissionsBitField.Flags.ViewChannel],
+					},
+					{
+					id: interaction.user.id,
+					allow: [PermissionsBitField.Flags.ViewChannel],
+					}, ],
+            		parent: openedCategory,
+				})
+				channelCreated.send(`${interaction.user}, Passez votre commande ici !`)
+        		channelCreated.setTopic(interaction.user.id,)
+        		if (!userIds.includes(userId)) {
+            		userIds.push(userId);
+        		}
+        		fs.writeFileSync('commands/tickets/ticket-opened.json', JSON.stringify(userIds));
+				interaction.reply({
+					content: `Votre commande a été ouverte ! ${channelCreated}`,
+					ephemeral: true
+				});
+				commande(interaction, channelCreated)
+			} catch (e) {
+				interaction.reply({
+					content:"La catégorie des tickets ouverts spécifié n'est pas valide !",
+					ephemeral:true
+				})
+			}
+		
 	} else if (userIds.includes(userId)) {
 		interaction.reply({content: "Vous avez déjà une commande ouverte !", ephemeral: true})
 	}
@@ -498,4 +521,4 @@ client.on(Events.InteractionCreate, async interaction => {
 		}
 	}
 });
-client.login(process.env.TOKEN);
+client.login(token);

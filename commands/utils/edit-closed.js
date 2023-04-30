@@ -18,7 +18,7 @@ module.exports = {
             configData = JSON.parse(configData);
             configData.closedCategory = closedCategoryId.toString();
             fs.writeFileSync('commands/tickets/config-ticket.json', JSON.stringify(configData));
-            await interaction.reply({content :`La catégorie des tickets fermés a été mise à jour avec succès avec l'ID ${openedCategoryId} !`, ephemeral: true});
+            await interaction.reply({content :`La catégorie des tickets fermés a été mise à jour avec succès avec l'ID ${closedCategoryId} !`, ephemeral: true});
         } else {
             await interaction.reply({content:"Vous n'avez pas la permission d'utiliser cette commande !", ephemeral:true})
         }
